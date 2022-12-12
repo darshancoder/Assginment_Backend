@@ -1,28 +1,27 @@
-require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
-const { connect } = require("./Config/db");
-const { userRouter } = require("./Route/user.route");
-const { notesRouter } = require("./Route/notes.route");
-const { authenticate } = require("./Middleware/authenticate");
+require("dotenv").config();
+const { UserRoutes } = require("./Routes/User.Route");
+
+const { connection } = require("./config/db");
+
 const app = express();
+
 app.use(express.json());
-app.use(cors());
-app.use("/user", userRouter);
 
 app.get("/", (req, res) => {
-  res.send("Welcome");
+  console.log("WElcome");
+  res.send({ MSG: "Welcome" });
 });
 
-app.use(authenticate);
-app.use("/notes", notesRouter);
+app.use("/users", UserRoutes);
 
 app.listen(process.env.PORT, async () => {
   try {
-    await connect();
-    console.log("db connection established");
-  } catch (err) {
-    console.log("db not connected");
+    await connection;
+    console.log("Connection to success to db");
+  } catch (e) {
+    console.log("Connection to DB failed");
+    console.log(e);
   }
-  console.log(`http://localhost:${process.env.PORT}`);
+  console.log(`Listing on the ${process.env.PORT}`);
 });
