@@ -1,26 +1,36 @@
-const express = require("express");
-require("dotenv").config();
-const { UserRoutes } = require("./Routes/User.Route");
-const { connection } = require("./config/db.js");
+const express = require("express")
+require('dotenv').config()
+const {connect} = require('./Config/db')
+const { authenticate } = require("./Middlewares/athuentication")
 
-const app = express();
+const {notesRouter} = require("./Routers/note.route")
+const {usersRouter} = require("./Routers/user.router")
+const cors = require("cors")
 
-app.use(express.json());
+const app = express()
 
-app.get("/", (req, res) => {
-  console.log("WElcome");
-  res.send({ MSG: "Welcome" });
-});
+app.use(express.json())
+app.use(cors())
 
-app.use("/users", UserRoutes);
+app.use("/users",usersRouter)
 
-app.listen(process.env.PORT, async () => {
-  try {
-    await connection;
-    console.log("Connection to success to db");
-  } catch (e) {
-    console.log("Connection to DB failed");
-    console.log(e);
-  }
-  console.log(`Listing on the ${process.env.PORT}`);
-});
+app.get("/",(req,res) => {
+    res.send("Welcome To Home Page")
+    console.log("Welcome To Console");
+})
+
+app.use(authenticate)
+app.use("/notes",notesRouter)
+
+
+app.listen(process.env.PORT, async() => {
+    try{
+        await connect()
+        console.log("Database is connected to successfully");
+    }catch(e){
+        console.log(e.message);
+        console.log("Database is connected to failed");
+        
+    }
+    console.log(`http://localhost:${process.env.PORT}`)
+})
